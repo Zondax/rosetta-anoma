@@ -21,7 +21,6 @@ RUN apt-get install -yy wget sudo curl build-essential git-core libssl-dev pkg-c
 
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-ENV RUSTFLAGS="-C target-cpu=native -g"
 
 RUN wget https://go.dev/dl/go1.18.linux-amd64.tar.gz && \
     tar -C /usr/local -xvf go1.18.linux-amd64.tar.gz
