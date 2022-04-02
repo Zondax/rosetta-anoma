@@ -27,7 +27,6 @@ RUN wget https://go.dev/dl/go1.18.linux-amd64.tar.gz && \
 
 RUN export PATH=$PATH:/usr/local/go/bin
 
-
 # Clone Anoma
 RUN if [ -z "${BRANCH}" ] && [ -z "${COMMIT_HASH}" ]; then \
   		echo 'Error: Both BRANCH and COMMIT_HASH are empty'; \
@@ -43,16 +42,21 @@ WORKDIR ${NODEPATH}
 RUN git clone ${REPO_ANOMA} ${NODEPATH}
 
 RUN if [ ! -z "${BRANCH}" ]; then \
-        echo "Checking out to Lotus branch: ${BRANCH}"; \
+        echo "Checking out to Anoma branch: ${BRANCH}"; \
   		git checkout ${BRANCH}; \
     fi
 
 RUN if [ ! -z "${COMMIT_HASH}" ]; then \
-		echo "Checking out to Lotus commit: ${COMMIT_HASH}"; \
+		echo "Checking out to Anoma commit: ${COMMIT_HASH}"; \
 		git checkout ${COMMIT_HASH}; \
 	fi
 
 RUN make install
+
+COPY ./start.sh /
+
+ENTRYPOINT ["/start.sh"]
+CMD ["",""]
 
 # Clone anoma-rosetta-proxy
 #RUN if [ -z "${BRANCH_PROXY}" ] && [ -z "${COMMIT_HASH_PROXY}" ]; then \
@@ -85,48 +89,25 @@ RUN make install
 #FROM ubuntu:20.04
 #
 #ENV DEBIAN_FRONTEND=noninteractive
-#ARG ROSETTA_PORT=8080
-#ARG LOTUS_API_PORT=1234
 #ARG PROXYPATH=/rosetta-proxy
 #
-## Install Lotus deps
+## Install deps
 #RUN apt-get update && \
-#    apt-get install -yy apt-utils  && \
-#    apt-get install -yy curl && \
-#    apt-get install -yy bzr jq pkg-config mesa-opencl-icd ocl-icd-opencl-dev wget libltdl7 libnuma1 hwloc libhwloc-dev
+#    apt-get install -yy curl
 #
-## Install Lotus
-#COPY --from=builder /usr/local/bin/lotus* /usr/local/bin/
-##Check Lotus installation
-#RUN lotus --version
+#RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+#ENV PATH="/root/.cargo/bin:${PATH}"
 #
-## Copy config files
-#COPY ./tools/calibration/files/rosetta_config.yaml /config.yaml
-#COPY ./tools/calibration/files/config.toml /etc/lotus_config/config.toml
-#
-## Copy test actors keys
-#COPY ./tools/calibration/files/test_actor_1.key /test_actor_1.key
-#COPY ./tools/calibration/files/test_actor_2.key /test_actor_2.key
-#COPY ./tools/calibration/files/test_actor_3.key /test_actor_3.key
-#
-## Copy startup script
-#COPY ./tools/calibration/files/start.sh /start.sh
-#
-#RUN mkdir -p /data/{node,storage}
-#ENV LOTUS_PATH=/data/node/
-#ENV LOTUS_STORAGE_PATH=/data/storage/
+## Install Anoma
+#COPY --from=builder /root/.cargo/bin/anoma* /usr/local/bin/
+##Check Anoma installation
+#RUN anoma node ledger -V
 #
 ##Install rosetta proxy
-#COPY --from=builder ${PROXYPATH}/filecoin-indexing-rosetta-proxy /usr/local/bin
+##COPY --from=builder ${PROXYPATH}/anoma-rosetta-proxy /usr/local/bin
 #
-#ENV LOTUS_RPC_URL=ws://127.0.0.1:1234/rpc/v0
-#ENV LOTUS_RPC_TOKEN=""
-#
-## Enable using WASM-compiled builtin actors
-#ENV LOTUS_USE_FVM_EXPERIMENTAL=1
-#
-#EXPOSE $ROSETTA_PORT
-#EXPOSE $LOTUS_API_PORT
+##Copy entrypoint script
+#COPY ./start.sh /
 #
 #ENTRYPOINT ["/start.sh"]
 #CMD ["",""]

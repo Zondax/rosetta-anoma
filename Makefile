@@ -20,7 +20,6 @@ CONTAINER_NAME=anomanode
 
 INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
 ROSETTA_PORT=8080
-LOTUS_API_PORT = 1234
 NPROC=16
 
 UNAME_S := $(shell uname -s)
@@ -61,7 +60,6 @@ define run_docker
     -v $(shell pwd)/data:/data \
     --name $(CONTAINER_NAME) \
     -p $(ROSETTA_PORT):$(ROSETTA_PORT) \
-    -p $(LOTUS_API_PORT):$(LOTUS_API_PORT) \
     $(DOCKER_IMAGE) $(RUN_ARGS)
 endef
 
